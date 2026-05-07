@@ -19,9 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-// ==========================================
-// KELAS DASAR (MODUL PRAKTIKUM & DATABASE)
-// ==========================================
+// KELAS DASAR
 class ValidasiException extends Exception { public ValidasiException(String pesan) { super(pesan); } }
 
 interface TransaksiItem { double hitungTotal(); }
@@ -110,9 +108,7 @@ class Database {
     }
 }
 
-// ==========================================
 // TEMA & WARNA MACOS
-// ==========================================
 class Theme {
     public static boolean isDark = true;
     public static Color bg() { return isDark ? Color.decode("#121212") : Color.decode("#F5F5F7"); }
@@ -140,9 +136,7 @@ class Theme {
     }
 }
 
-// ==========================================
-// KOMPONEN UI "ULTIMATE MACOS"
-// ==========================================
+// KOMPONEN UI
 class PremiumButton extends JButton {
     public enum Style { PRIMARY, SECONDARY, DANGER, CALENDAR_DAY }
     private Style style;
@@ -348,9 +342,7 @@ class PremiumCalendarDialog extends JDialog {
     public LocalDateTime getSelectedDateTime() { return isConfirmed ? selectedDateTime : null; }
 }
 
-// ==========================================
 // KELAS UTAMA
-// ==========================================
 public class Warnet extends JFrame {
 
     String currentUser = ""; String currentUserRole = ""; 
@@ -468,9 +460,7 @@ public class Warnet extends JFrame {
         } catch (SQLException e) {}
     }
 
-    // ==========================================
     // UI LOGIN & REGISTER
-    // ==========================================
     public void buildLoginUI() {
         loginPanel.removeAll();
         PremiumCard card = new PremiumCard(); card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS)); card.setBorder(new EmptyBorder(60, 60, 60, 60));
@@ -591,9 +581,7 @@ public class Warnet extends JFrame {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ==========================================
     // UI USER / MEMBER
-    // ==========================================
     public void buildUserUI() {
         userPanel.removeAll(); userBookPcButtons.clear(); userActivatePcButtons.clear();
         selectedPcIdForUser = -1; verifiedTransId = -1; verifiedPcType = ""; verifiedPcIdForAct = -1;
@@ -775,7 +763,7 @@ public class Warnet extends JFrame {
         step1Panel.add(formCard, BorderLayout.WEST); 
         step1Panel.add(gridCard1, BorderLayout.CENTER);
 
-        // STEP 2: F&B
+        // F&B
         JPanel step2Panel = new JPanel(new BorderLayout()); step2Panel.setBorder(new EmptyBorder(40, 40, 40, 40)); step2Panel.setOpaque(false);
         PremiumCard fbCard = new PremiumCard(); fbCard.setLayout(new BoxLayout(fbCard, BoxLayout.Y_AXIS)); fbCard.setBorder(new EmptyBorder(40, 40, 40, 40));
 
@@ -930,7 +918,6 @@ public class Warnet extends JFrame {
         btnNavFood.addActionListener(e -> {
             cbActivePc.removeAllItems();
             try(Connection conn = Database.connect()) {
-                // FIX: Menampilkan F&B hanya untuk PC yang beneran lagi AKTIF dimainin
                 PreparedStatement ps = conn.prepareStatement("SELECT id, pc_id, pc_type FROM transactions WHERE customer_name = ? AND status = 'AKTIF' AND is_activated = 1");
                 ps.setString(1, currentUser);
                 ResultSet rs = ps.executeQuery();
@@ -947,7 +934,7 @@ public class Warnet extends JFrame {
             userContentLayout.show(userContentPanel, "FOOD"); applyGlobalTheme(userContentPanel);
         });
 
-        // LOGIKA BUTTONS (F&B)
+        // F&B
         btnAddFood.addActionListener(e -> {
             if(menuList.isEmpty()) return; MenuItem selectedItem = menuList.get(cbFoodMenu.getSelectedIndex());
             try {
@@ -987,7 +974,7 @@ public class Warnet extends JFrame {
             } catch (SQLException ex) { ex.printStackTrace(); JOptionPane.showMessageDialog(this, "Gagal mesen: " + ex.getMessage()); }
         });
 
-        // LOGIKA BUTTONS (BOOKING)
+        // BOOKING
         btnNext.addActionListener(e -> {
             String mod = (String) cbMode.getSelectedItem();
             if(mod == null) return;
@@ -1010,7 +997,7 @@ public class Warnet extends JFrame {
                 if(currentBookingDateTime == null) { JOptionPane.showMessageDialog(this, "Pilih tanggal/jam dulu di kalender bos!"); return; }
                 if (currentBookingDateTime.isBefore(LocalDateTime.now())) { JOptionPane.showMessageDialog(this, "Pilih waktu masa depan dong, gabisa *time travel*!"); return; }
                 try (Connection conn = Database.connect()) {
-                    // FIX: Cek jadwal bentrok bener-bener akurat
+                    
                     PreparedStatement psCheck = conn.prepareStatement("SELECT id FROM transactions WHERE pc_id = ? AND status IN ('BELUM_DIPAKAI', 'AKTIF', 'DIPESAN') AND booking_datetime IS NOT NULL AND ABS(TIMESTAMPDIFF(MINUTE, booking_datetime, ?)) < 60"); 
                     psCheck.setInt(1, selectedPcIdForUser); psCheck.setTimestamp(2, java.sql.Timestamp.valueOf(currentBookingDateTime));
                     if(psCheck.executeQuery().next()) { JOptionPane.showMessageDialog(this, "Jadwal bentrok sama booking orang lain. Geser dikit jamnya bos."); return; }
@@ -1165,7 +1152,6 @@ public class Warnet extends JFrame {
                 String dbStatus = rs.getString("status");
                 String actCodeRaw = rs.getString("activation_code");
                 
-                // FIX: Menangani tampilan Gas Sekarang agar tulisan menjadi "SEDANG MAIN"
                 boolean isGasSekarang = "LANGSUNG".equals(actCodeRaw) || (dbStatus.equals("AKTIF") && rs.getInt("is_activated") == 1);
                 String bigText, smallText;
                 if (isGasSekarang) { bigText = "SEDANG"; smallText = "MAIN"; } 
@@ -1227,9 +1213,7 @@ public class Warnet extends JFrame {
         scheduleListPanel.revalidate(); scheduleListPanel.repaint(); applyGlobalTheme(scheduleListPanel);
     }
 
-    // ==========================================
     // UI ADMIN
-    // ==========================================
     public void buildAdminUI() {
         adminPanel.removeAll(); adminPcButtons.clear();
 
@@ -1262,7 +1246,7 @@ public class Warnet extends JFrame {
 
         CardLayout adminContentLayout = new CardLayout(); JPanel adminContentPanel = new JPanel(adminContentLayout);
 
-        // TAB 1: Pantau PC
+        // Pantau PC
         JPanel pcMonitorPanel = new JPanel(new BorderLayout()); pcMonitorPanel.setBorder(new EmptyBorder(40, 40, 40, 40)); pcMonitorPanel.setOpaque(false);
         PremiumCard pcMonitorCard = new PremiumCard(); pcMonitorCard.setLayout(new BorderLayout(0, 15)); pcMonitorCard.setBorder(new EmptyBorder(30,30,30,30));
 
@@ -1281,7 +1265,7 @@ public class Warnet extends JFrame {
         pcMonitorPanel.add(pcMonitorCard, BorderLayout.CENTER);
         adminContentPanel.add(pcMonitorPanel, "PANTAU");
 
-        // TAB 2: Riwayat & Pesanan Makanan 
+        // Riwayat & Pesanan Makanan 
         JPanel historyPanel = new JPanel(new BorderLayout(0, 20)); historyPanel.setBorder(new EmptyBorder(40, 40, 40, 40)); historyPanel.setOpaque(false);
         
         PremiumCard orderCard = new PremiumCard(); orderCard.setLayout(new BorderLayout(0, 10)); orderCard.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -1391,9 +1375,7 @@ public class Warnet extends JFrame {
         startDataSyncTimer(refreshTables, null, adminPcButtons);
     }
 
-    // ==========================================
     // LOGIKA AUTO-BILLING & BACKGROUND SYNC
-    // ==========================================
     @SafeVarargs
     private final void startDataSyncTimer(Runnable refreshTables, JLabel ignored, List<PCButton>... lists) {
         stopDataSyncTimer(); fetchPcStatuses(lists);
@@ -1473,9 +1455,7 @@ public class Warnet extends JFrame {
         }
     }
 
-    // ==========================================
     // UTILITY METHODS
-    // ==========================================
     private JPanel createFloorPanel(String title, int startId, int endId, String type, List<PCButton> list, ActionListener listener) {
         JPanel panel = new JPanel(new BorderLayout(0, 15)); panel.setOpaque(false); panel.setBorder(new EmptyBorder(10, 0, 25, 0));
         panel.add(createCenteredLabel(title, "TITLE", 17, Font.BOLD), BorderLayout.NORTH);
